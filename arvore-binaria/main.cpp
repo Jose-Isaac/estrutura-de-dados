@@ -1,7 +1,5 @@
 #include <iostream>
-#include <cstring>
 #include <string>
-
 
 int GLOBAL_SPACE = 5;
 
@@ -115,12 +113,13 @@ void menu(struct TreeNode *&root) {
         cin >> option;
 
         switch (option) {
-            case 1:
-                cout << "enter with a new value:\n";
+            case 1: {
                 string newWord;
+                cout << "enter with a new value:\n";
                 cin >> newWord;
                 insert(root, newWord);
                 break;
+            }
             case 2:
                 cout << "enter with a new value:\n";
                 break;
