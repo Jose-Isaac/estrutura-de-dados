@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstring>
+#include <string>
+
 
 int GLOBAL_SPACE = 5;
 
@@ -65,11 +67,41 @@ void postOrder(struct TreeNode *node, int space) {
     }
 }
 
-void menu(struct TreeNode *root) {
+
+TreeNode* remove(TreeNode *&node, string name ){
+    if(node == nullptr){
+        return nullptr;
+    }else{
+        if(node->value == name){
+                //removendo nó folha
+                if(node->leftChild == nullptr && node->rightChild == nullptr){
+                     delete node;
+                     //imprimir uma msg aqui!!!
+                     return nullptr;
+                }else{
+                    //remove no com filhos
+                }
+
+        }
+        else{
+                if(name < node->value){
+                    node->leftChild = remove(node->leftChild, name);
+                }
+                else{
+                    node->rightChild = remove(node->rightChild, name);
+                }
+                return node;
+
+        }
+    }
+}
+
+
+void menu(struct TreeNode *&root) {
     bool isFinish = false;
 
     while (!isFinish) {
-        int option = 0;
+        int option;
 
         cout << "\n\noptions:\n";
         cout << "[1] - insert\n";
@@ -85,13 +117,18 @@ void menu(struct TreeNode *root) {
         switch (option) {
             case 1:
                 cout << "enter with a new value:\n";
-                string *newWord;
+                string newWord;
                 cin >> newWord;
                 insert(root, newWord);
                 break;
             case 2:
+                cout << "enter with a new value:\n";
                 break;
             case 3:
+                cout << "enter with a name to removed:\n";
+                string newWord;
+                cin >> newWord;
+                root = remove(root, newWord);
                 break;
             case 4:
                 postOrder(root, GLOBAL_SPACE);
