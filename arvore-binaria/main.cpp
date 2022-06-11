@@ -7,18 +7,18 @@ using namespace std;
 
 struct TreeNode {
     string value;
-    TreeNode *leftChild;
-    TreeNode *rightChild;
-    TreeNode *dad;
+    TreeNode *leftChild = nullptr;
+    TreeNode *rightChild = nullptr;
+    TreeNode *dad = nullptr;
 };
 
 void instantiateTree(struct TreeNode *&root) {
     root = nullptr;
 }
 
-void insert(struct TreeNode *&node, string newString) {
+void insert(struct TreeNode *&node, const string& newString) {
     if (node == nullptr) {
-        node = new TreeNode;
+        node =  (TreeNode*)malloc(sizeof(TreeNode));
         node->value = newString;
         node->leftChild = nullptr;
         node->rightChild = nullptr;
@@ -65,6 +65,45 @@ void postOrder(struct TreeNode *node, int space) {
     }
 }
 
+struct TreeNode* minValueNode(struct TreeNode* node)
+{
+    struct TreeNode* current = node;
+
+    while (current && current->leftChild != nullptr)
+        current = current->leftChild;
+
+    return current;
+}
+
+TreeNode * deleteNode(struct TreeNode *node, const string& wordToDelete) {
+    if (node == nullptr) {
+        return node;
+    }
+
+    if (wordToDelete < node->value) {
+        node->leftChild = deleteNode(node->leftChild, wordToDelete);
+    } else if (wordToDelete > node->value) {
+        node->rightChild = deleteNode(node->rightChild, wordToDelete);
+    } else {
+        if (node->leftChild == nullptr && node->rightChild == nullptr){
+            return nullptr;
+        } else if (node->leftChild == nullptr) {
+            struct TreeNode* temp = node->rightChild;
+            free(node);
+            return temp;
+        } else if (node->rightChild == nullptr) {
+            struct TreeNode* temp = node->leftChild;
+            free(node);
+            return temp;
+        }
+
+        struct TreeNode* temp = minValueNode(node->rightChild);
+        node->value = temp->value;
+        node->rightChild = deleteNode(node->rightChild, temp->value);
+    }
+    return node;
+}
+
 void menu(struct TreeNode *root) {
     bool isFinish = false;
 
@@ -92,8 +131,13 @@ void menu(struct TreeNode *root) {
             }
             case 2:
                 break;
-            case 3:
+            case 3: {
+                string word;
+                cout << "enter with word to delete\n";
+                cin >> word;
+                deleteNode(root, word);
                 break;
+            }
             case 4:
                 postOrder(root, GLOBAL_SPACE);
                 break;
@@ -102,6 +146,7 @@ void menu(struct TreeNode *root) {
                 break;
             default:
                 cout << "\nenter a valid option!\n";
+                break;
         }
     };
 }
