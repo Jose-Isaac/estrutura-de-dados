@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <fstream>
 
 int GLOBAL_SPACE = 5;
 
@@ -159,10 +160,31 @@ void insertDatas(struct TreeNode *&node) {
     }
 }
 
-int main() {
+void loadDataFromFile(char* path) {
+    fstream names;
+    names.open("data.txt", ios::in);
+
+    cout << "is open\n";
+    string line;
+    while (getline(names, line)) {
+        cout << "line: " << line << "\n";
+    }
+    names.close();
+}
+
+int main(int argc, char** argv) {
+    if (argc == 0) {
+        cout << "file path not informed!\n";
+        return 1;
+    }
+
+    cout << argv[0];
+
     TreeNode *tree;
     instantiateTree(tree);
-    insertDatas(tree);
+    loadDataFromFile(argv[0]);
+    // postOrder(tree, GLOBAL_SPACE);
+    //insertDatas(tree);
     menu(tree);
     return 0;
 }
