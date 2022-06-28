@@ -24,12 +24,12 @@ void insert(struct TreeNode *&node, const string& newString) {
         node->leftChild = nullptr;
         node->rightChild = nullptr;
         node->dad = nullptr;
-        cout << "newString: " << newString << " inserted!";
+        cout << "new name: " << newString << " inserted!\n";
     } else {
-        if (newString < node->value) {
+        if (newString.length() < node->value.length()) {
             insert(node->leftChild, newString);
             node->leftChild->dad = node;
-        } else if (newString > node->value) {
+        } else if (newString.length() > node->value.length()) {
             insert(node->rightChild, newString);
             node->rightChild->dad = node;
         } else {
@@ -51,7 +51,7 @@ void printNode(TreeNode *node) {
     cout << "[dad: " << dad << "][current: " << node->value << "][leftChild: " << leftChild << "][rightChild: " << rightChild << "]";
 }
 
-void postOrder(struct TreeNode *node, int space) {
+void postOrder(struct TreeNode *node, int space) {    
     if (node == nullptr) {
         return;
     } else {
@@ -64,6 +64,18 @@ void postOrder(struct TreeNode *node, int space) {
         printNode(node);
         postOrder(node->leftChild, space);
     }
+    
+}
+
+struct TreeNode* search(struct TreeNode* node, string& name) {
+    if (node == nullptr || node->value == name) return node;
+
+    if (name.length() <= node->value.length()) {
+        return search(node->leftChild, name);
+    }
+
+    return search(node->rightChild, name);
+
 }
 
 struct TreeNode* minValueNode(struct TreeNode* node)
@@ -76,17 +88,18 @@ struct TreeNode* minValueNode(struct TreeNode* node)
     return current;
 }
 
-TreeNode * deleteNode(struct TreeNode *node, const string& wordToDelete) {
+TreeNode * deleteNode(struct TreeNode *node, const string& nameToDelete) {
     if (node == nullptr) {
         return node;
     }
 
-    if (wordToDelete < node->value) {
-        node->leftChild = deleteNode(node->leftChild, wordToDelete);
-    } else if (wordToDelete > node->value) {
-        node->rightChild = deleteNode(node->rightChild, wordToDelete);
+    if ((nameToDelete.length() <= node->value.length()) && (node->value != nameToDelete)) {
+        node->leftChild = deleteNode(node->leftChild, nameToDelete);
+    } else if (nameToDelete.length() > node->value.length()) {
+        node->rightChild = deleteNode(node->rightChild, nameToDelete);
     } else {
         if (node->leftChild == nullptr && node->rightChild == nullptr){
+            free(node);
             return nullptr;
         } else if (node->leftChild == nullptr) {
             struct TreeNode* temp = node->rightChild;
@@ -98,11 +111,24 @@ TreeNode * deleteNode(struct TreeNode *node, const string& wordToDelete) {
             return temp;
         }
 
-        struct TreeNode* temp = minValueNode(node->rightChild);
-        node->value = temp->value;
-        node->rightChild = deleteNode(node->rightChild, temp->value);
+        if (node->value == nameToDelete) {
+            struct TreeNode* temp = minValueNode(node->rightChild);
+            node->value = temp->value;
+            node->rightChild = deleteNode(node->rightChild, temp->value);
+        }
     }
     return node;
+}
+
+void checkAndDelete(TreeNode *node, string name) {
+  TreeNode* result = search(node, name);
+  if (result) {
+      deleteNode(node, name);
+      cout << "this name: " << name << " is deleted!\n";
+      postOrder(node, GLOBAL_SPACE);
+  } else {
+      cout << "this name: " << name << " not found in the tree\n";
+  }
 }
 
 void menu(struct TreeNode *root) {
@@ -130,18 +156,32 @@ void menu(struct TreeNode *root) {
                 insert(root, newWord);
                 break;
             }
-            case 2:
-                break;
-            case 3: {
-                string word;
-                cout << "enter with word to delete\n";
-                cin >> word;
-                deleteNode(root, word);
+            case 2: {
+                string name;
+                cout << "enter with name to search:\n";
+                cin >> name;
+                checkAndDelete(root, name);
                 break;
             }
-            case 4:
+            case 3: {
+                string name;
+                cout << "enter with word to delete\n";
+                cin >> name;
+
+                TreeNode* result = search(root, name);
+                if (result) {
+                    deleteNode(root, name);
+                    cout << "this name: " << name << " is deleted!";
+                    postOrder(root, GLOBAL_SPACE);
+                } else {
+                    cout << "this name: " << name << " not found in the tree";
+                }
+                break;
+            }
+            case 4: {
                 postOrder(root, GLOBAL_SPACE);
                 break;
+            }
             case 5:
                 isFinish = true;
                 break;
@@ -149,42 +189,44 @@ void menu(struct TreeNode *root) {
                 cout << "\nenter a valid option!\n";
                 break;
         }
-    };
-}
-
-void insertDatas(struct TreeNode *&node) {
-    string datas[5] = {"João", "José", "Maria", "Pedro", "Antonio"};
-
-    for (const string& data : datas) {
-        insert(node, data);
     }
 }
 
-void loadDataFromFile(char* path) {
-    fstream names;
-    names.open("data.txt", ios::in);
+void loadDataFromFile(char* path, TreeNode*& tree) {
+    ifstream names;
+    names.open(path);
 
-    cout << "is open\n";
-    string line;
-    while (getline(names, line)) {
-        cout << "line: " << line << "\n";
+    if (names.is_open()) {
+        cout << "\nfile is open!\nloading datas...\n";
+
+        string name;
+        int isToInsert;
+
+        while (!names.eof()) {
+            names >> name;
+            names >> isToInsert;
+
+            if (isToInsert) {
+                insert(tree, name);
+            } else {
+                checkAndDelete(tree, name);
+            }
+        }
+        names.close();
     }
-    names.close();
 }
 
 int main(int argc, char** argv) {
-    if (argc == 0) {
+    if (argc < 2) {
         cout << "file path not informed!\n";
         return 1;
     }
 
-    cout << argv[0];
+    cout << "path " << argv[1];
 
     TreeNode *tree;
     instantiateTree(tree);
-    loadDataFromFile(argv[0]);
-    // postOrder(tree, GLOBAL_SPACE);
-    //insertDatas(tree);
+    loadDataFromFile(argv[1], tree);
     menu(tree);
     return 0;
 }
