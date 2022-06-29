@@ -26,10 +26,10 @@ void insert(struct TreeNode *&node, const string& newString) {
         node->dad = nullptr;
         cout << "new name: " << newString << " inserted!\n";
     } else {
-        if (newString.length() < node->value.length()) {
+        if (newString < node->value) {
             insert(node->leftChild, newString);
             node->leftChild->dad = node;
-        } else if (newString.length() > node->value.length()) {
+        } else if (newString > node->value) {
             insert(node->rightChild, newString);
             node->rightChild->dad = node;
         } else {
@@ -48,7 +48,7 @@ void printNode(TreeNode *node) {
     string leftChild = (node->leftChild != nullptr) ? node->leftChild->value : "";
     string rightChild = (node->rightChild != nullptr) ? node->rightChild->value : "";
 
-    cout << "[dad: " << dad << "][current: " << node->value << "][leftChild: " << leftChild << "][rightChild: " << rightChild << "]";
+    cout << "[" << node->value << "]";
 }
 
 void postOrder(struct TreeNode *node, int space) {    
@@ -70,7 +70,7 @@ void postOrder(struct TreeNode *node, int space) {
 struct TreeNode* search(struct TreeNode* node, string& name) {
     if (node == nullptr || node->value == name) return node;
 
-    if (name.length() <= node->value.length()) {
+    if (name <= node->value) {
         return search(node->leftChild, name);
     }
 
@@ -160,22 +160,19 @@ void menu(struct TreeNode *root) {
                 string name;
                 cout << "enter with name to search:\n";
                 cin >> name;
-                checkAndDelete(root, name);
+                TreeNode* temp = search(root, name);
+                if (temp != nullptr) {
+                  cout << "This name " << temp->value << " is found"; 
+                } else {
+                  cout << "This name " << name << " is not found"; 
+                }
                 break;
             }
             case 3: {
                 string name;
                 cout << "enter with word to delete\n";
                 cin >> name;
-
-                TreeNode* result = search(root, name);
-                if (result) {
-                    deleteNode(root, name);
-                    cout << "this name: " << name << " is deleted!";
-                    postOrder(root, GLOBAL_SPACE);
-                } else {
-                    cout << "this name: " << name << " not found in the tree";
-                }
+                checkAndDelete(root, name);
                 break;
             }
             case 4: {
@@ -189,6 +186,7 @@ void menu(struct TreeNode *root) {
                 cout << "\nenter a valid option!\n";
                 break;
         }
+      postOrder(root, GLOBAL_SPACE);
     }
 }
 
