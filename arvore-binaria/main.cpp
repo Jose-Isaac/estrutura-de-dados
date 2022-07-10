@@ -56,13 +56,13 @@ void postOrder(struct TreeNode *node, int space) {
         return;
     } else {
         space += GLOBAL_SPACE;
-        postOrder(node->rightChild, space);
+        postOrder(node->leftChild, space);
         cout << endl;
         for (int i = GLOBAL_SPACE; i < space; i ++) {
             cout << " ";
         }
         printNode(node);
-        postOrder(node->leftChild, space);
+        postOrder(node->rightChild, space);
     }
     
 }
